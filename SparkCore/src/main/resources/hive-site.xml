@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+      <description>Hive使用该目录存储不同map/reduce阶段的计划及阶段的中间输出</description>
+      <name>hive.exec.scratchdir</name>
+      <value>hdfs://master:8020/user/hive/tmp</value>
+    </property>
+    <property>
+      <description>元数据库位置</description>
+      <name>hive.metastore.warehouse.dir</name>
+      <value>hdfs://master:8020/user/hive/warehouse</value>
+    </property>
+    <property>
+      <description>Hive运行时结构化日志文件的位置</description>
+      <name>hive.querylog.location</name>
+      <value>hdfs://master:8020/user/hive/log</value>
+    </property>
+    <property>
+      <description>目标元数据库</description>
+      <name>hive.metastore.uris</name>
+      <value>thrift://master:9083</value>
+    </property>
+    <property>
+      <description>元数据连接字符串</description>
+      <name>javax.jdo.option.ConnectionURL</name>
+      <value>jdbc:mysql://master:3306/hive?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=GMT</value>
+    </property>
+    <property>
+      <description>元数据连接驱动类名</description>
+      <name>javax.jdo.option.ConnectionDriverName</name>
+      <value>com.mysql.cj.jdbc.Driver</value>
+    </property>
+    <property>
+      <description>元数据连接时的用户名</description>
+      <name>javax.jdo.option.ConnectionUserName</name>
+      <value>root</value>
+    </property>
+    <property>
+      <description>元数据连接时的用户密码</description>
+      <name>javax.jdo.option.ConnectionPassword</name>
+      <value>linrushao</value>
+    </property>
+    <property>
+      <description>允许多线程同时通过JDO访问元数据</description>
+      <name>javax.jdo.option.Multithreaded</name>
+      <value>true</value>
+    </property>
+    <property>
+      <description>HiveServer2 Thrift接口的端口号</description>
+      <name>hive.server2.thrift.port</name>
+      <value>10000</value>
+    </property>
+    <property>
+      <description>运行HiveServer2 Thrift接口的主机</description>
+      <name>hive.server2.thrift.bind.host</name>
+      <value>master</value>
+    </property>
+<property>
+    <name>hive.cli.print.header</name>
+    <value>true</value>
+    <description>Whether to print the names of the columns in query output.</description>
+</property>
+<property>
+    <name>hive.cli.print.current.db</name>
+    <value>true</value>
+    <description>Whether to include the current database in the Hive prompt.</description>
+</property>
+</configuration>
