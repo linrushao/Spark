@@ -10,7 +10,7 @@ object Spark01_WorkCount {
     //TODO 1.连接Spark环境
     val sparkConf = new SparkConf()
     //环境
-    sparkConf.setMaster("local")
+    sparkConf.setMaster("120.79.35.91")
     //应用程序的名称
     sparkConf.setAppName("WorkCount")
     val sc = new SparkContext(sparkConf)

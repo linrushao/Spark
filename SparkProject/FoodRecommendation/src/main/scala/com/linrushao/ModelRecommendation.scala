@@ -1,20 +1,23 @@
 package com.linrushao
 
 import org.apache.spark.SparkContext
+import org.apache.spark.ml.evaluation.RegressionEvaluator
+import org.apache.spark.ml.recommendation.{ALS, ALSModel}
+import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.apache.spark.sql.expressions.Window.orderBy
 import org.apache.spark.sql.functions.{dense_rank, max}
 
 /**
  * @Author linrushao
- * @Date 2023-08-22
+ * @Date 2023-08-25
  */
-object ModelTrain {
+object ModelRecommendation {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession
       .builder()
       .master("local[2]")
-      .appName("DataLoad")
+      .appName("ModelRecommendation")
       .getOrCreate()
 
     //创建SparkContext
@@ -56,26 +59,47 @@ object ModelTrain {
     val trainData: Dataset[Row] = sortedData.limit(trainEndIndex)
     val validData: Dataset[Row] = sortedData.limit(validEndIndex).except(trainData)
     val testData: Dataset[Row] = sortedData.except(trainData).except(validData)
-    println("训练集：" + trainData.count())
-    println("验证集：" + validData.count())
-    println("测试集：" + testData.count())
-//    trainData.show(10)
 
-    //保存数据集
-    trainData.write
-      .format("parquet")
-      .mode("overwrite")
-      .save("hdfs://master:8020/output/trainData")
+    //设置模型参数 -- 协同过滤---最小二乘法
+    val als: ALS = new ALS()
+      //必选参数
+      .setItemCol("MealEncoded")
+      .setUserCol("UserEncoded")
+      .setRatingCol("Rating")
+      //可选参数
+      .setRank(50)
+      .setAlpha(0.01)
+      .setMaxIter(10)
+      .setImplicitPrefs(false)
+      .setRegParam(0.3)
 
-    validData.write
-      .format("parquet")
-      .mode("overwrite")
-      .save("hdfs://master:8020/output/validData")
+    val model: ALSModel = als.fit(trainData)
+    //将模型里面的NaN数据删除
 
-    testData.write
-      .format("parquet")
-      .mode("overwrite")
-      .save("hdfs://master:8020/output/testData")
+    model.setColdStartStrategy("drop")
+    val pre: DataFrame = model.transform(testData)
+    pre.show()
+
+    val evaluator: RegressionEvaluator = new RegressionEvaluator()
+      .setMetricName("rmse")
+      .setLabelCol("Rating")
+      .setPredictionCol("prediction")
+    val rmse: Double = evaluator.evaluate(pre)
+    println(s"均方误差=$rmse")
+
+
+    //为用户推荐前10名的菜品
+    val userRecs: DataFrame = model.recommendForAllUsers(10)
+    userRecs.show(truncate = false)
+    //为菜品推荐前10的用户
+    val mealRecs: DataFrame = model.recommendForAllItems(10)
+    mealRecs.show(truncate = false)
+
+    //未指定用户组生成10个网址推荐
+    val users: Dataset[Row] = sortedData.select(als.getUserCol).distinct().limit(5)
+    users.show(truncate = false)
+    val userSubsetResc: DataFrame = model.recommendForUserSubset(users, 10)
+    userSubsetResc.show(truncate = false)
 
 
     spark.stop()

@@ -15,7 +15,7 @@ object DataEncode {
     val spark: SparkSession = SparkSession
       .builder()
       .master("local[2]")
-      .appName("DataLoad")
+      .appName("DataEncode")
       .getOrCreate()
 
     //创建SparkContext

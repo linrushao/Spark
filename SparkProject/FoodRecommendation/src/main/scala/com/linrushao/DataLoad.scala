@@ -152,10 +152,10 @@ object DataLoad {
 
     println("========保存去重后的用户评分记录到hdfs中========")
     // 保存去重后的评分记录到HDFS
-//    latestRatings.write
-//      .format("csv")
-//      .mode("overwrite") // 覆盖已存在的数据
-//      .save("hdfs://master:8020/output/duplicateMeal")
+    latestRatings.write
+      .format("csv")
+      .mode("overwrite") // 覆盖已存在的数据
+      .save("hdfs://master:8020/output/duplicateMeal")
 
     spark.stop()
   }

@@ -1,9 +1,9 @@
 package com.tipdm.spark_03_als
 
 import com.tipdm.common.CommonObject
-import org.apache.spark.ml.recommendation.ALS
-import org.apache.spark.ml.PipelineModel
+import org.apache.spark.ml.recommendation.{ALS, ALSModel}
 import org.apache.spark.ml.evaluation.RegressionEvaluator
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
   * 03模型的构建和保存以及模型均方误差
@@ -12,8 +12,8 @@ object ModelPingFen {
 
   def main(args: Array[String]): Unit = {
     System.setProperty("HADOOP_USER_NAME", "root")
-    val spark = CommonObject.getHead("ModelPingFen")
-    val modeData = spark.read.table("law.law_model")
+    val spark: SparkSession = CommonObject.getHead("ModelPingFen")
+    val modeData: DataFrame = spark.read.table("law.law_model")
 
     //数据切分==>切分训练集 和 测试集
     //训练集 做相关的训练
@@ -33,10 +33,10 @@ object ModelPingFen {
       .setImplicitPrefs(false)
       .setRegParam(0.09)
 
-    val model = als.fit(train)
-    //将模型里面的NaN数据删除
+    val model: ALSModel = als.fit(train)
+    //将模型里面的NaN数据删除， //关闭冷启动（防止计算误差不产生NaN）
     model.setColdStartStrategy("drop")
-    val pre = model.transform(test)
+    val pre: DataFrame = model.transform(test)
     pre.show()
     //模型的保存
     //model.save("hdfs://master:8020/model/ALS")
